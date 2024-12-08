@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, RefreshCcw, Check, Volume2, VolumeX } from "lucide-react";
+import { Play, Pause, RefreshCcw, Check } from "lucide-react";
 import { getScriptBySceneId, getDialogLines, loadVoices } from "./utils";
 import ScriptDisplay from "./components/ScriptDisplay";
 import SceneSelection from "./components/SceneSelection";
@@ -14,8 +14,6 @@ const App = () => {
   const [isUserTurn, setIsUserTurn] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [voicesLoaded, setVoicesLoaded] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
 
   const scriptContainerRef = useRef(null);
   const animationRef = useRef(null);
@@ -53,7 +51,6 @@ const App = () => {
     setScrollPosition(0);
     setIsUserTurn(false);
     setHasStarted(false);
-    setIsSpeaking(false);
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
     }
@@ -61,7 +58,7 @@ const App = () => {
 
   const speakLine = (line) => {
     return new Promise((resolve, reject) => {
-      if (!voicesLoaded || isMuted || !line) {
+      if (!voicesLoaded || !line) {
         resolve();
         return;
       }
@@ -77,18 +74,15 @@ const App = () => {
 
       utterance.onend = () => {
         utteranceRef.current = null;
-        setIsSpeaking(false);
         resolve();
       };
 
       utterance.onerror = (error) => {
         console.error("Speech error:", error);
         utteranceRef.current = null;
-        setIsSpeaking(false);
         reject(error);
       };
 
-      setIsSpeaking(true);
       window.speechSynthesis.speak(utterance);
     });
   };
@@ -125,14 +119,7 @@ const App = () => {
         clearTimeout(timeoutId);
       }
     };
-  }, [
-    currentLineIndex,
-    isPlaying,
-    isUserTurn,
-    dialogLines,
-    isMuted,
-    voicesLoaded,
-  ]);
+  }, [currentLineIndex, isPlaying, isUserTurn, dialogLines, voicesLoaded]);
 
   // Handle user turns
   useEffect(() => {
@@ -155,13 +142,6 @@ const App = () => {
       }
     }
     setIsPlaying(!isPlaying);
-  };
-
-  const toggleMute = () => {
-    if (!isMuted && utteranceRef.current) {
-      window.speechSynthesis.cancel();
-    }
-    setIsMuted(!isMuted);
   };
 
   const handleFinishTurn = () => {
@@ -261,13 +241,6 @@ const App = () => {
                   >
                     <RefreshCcw size={20} />
                     <span>Reset</span>
-                  </Button>
-                  <Button
-                    onClick={toggleMute}
-                    variant="outline"
-                    className="flex items-center space-x-2"
-                  >
-                    {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
                   </Button>
                 </>
               )}
