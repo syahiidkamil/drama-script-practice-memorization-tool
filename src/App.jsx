@@ -1,22 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, RefreshCcw, Check, Volume2, VolumeX } from "lucide-react";
-import { ROLES } from "./constants";
 import {
-  getCharacterScenes,
   getScriptBySceneId,
   getDialogLines,
-  getCharacterDisplayName,
+  speak,
+  stopSpeaking,
+  loadVoices,
 } from "./utils";
-import { speak, stopSpeaking, loadVoices } from "./utils";
 import ScriptDisplay from "./components/ScriptDisplay";
+import SceneSelection from "./components/SceneSelection";
 
 const App = () => {
   const [selectedRole, setSelectedRole] = useState("");
@@ -44,6 +37,11 @@ const App = () => {
   const handleRoleSelect = (roleId) => {
     setSelectedRole(roleId);
     setSelectedScene("");
+    resetScript();
+  };
+
+  const handleSceneSelect = (sceneId) => {
+    setSelectedScene(sceneId);
     resetScript();
   };
 
@@ -117,11 +115,9 @@ const App = () => {
     setCurrentLineIndex((prev) => prev + 1);
   };
 
-  // Get current script and its dialog lines
   const currentScript = getScriptBySceneId(selectedScene);
   const dialogLines = getDialogLines(currentScript);
 
-  // Script scrolling animation
   useEffect(() => {
     if (!isPlaying || isUserTurn) return;
 
@@ -174,38 +170,6 @@ const App = () => {
     };
   }, []);
 
-  const renderDialogLine = (line, index) => {
-    const isCurrentLine = index === currentLineIndex;
-    const isUserLine = line.character === selectedRole;
-
-    return (
-      <div
-        key={index}
-        className={`mb-4 p-2 rounded ${
-          isCurrentLine ? "bg-blue-50 border border-blue-200" : ""
-        } ${isUserLine ? "text-blue-700" : "text-gray-700"}`}
-      >
-        {line.type === "narration" || line.type === "stage_direction" ? (
-          <div className="italic text-gray-600">{line.text}</div>
-        ) : (
-          <>
-            <div className="font-semibold">
-              {getCharacterDisplayName(line.character)}:
-            </div>
-            <div className="mt-1">
-              {line.text}
-              {line.stage_direction && (
-                <span className="italic text-gray-500 ml-2">
-                  ({line.stage_direction})
-                </span>
-              )}
-            </div>
-          </>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-xl mx-auto space-y-6">
@@ -213,61 +177,12 @@ const App = () => {
           Script Practice Tool
         </h1>
 
-        {/* Role Selection */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Select Your Role
-          </label>
-          <Select value={selectedRole} onValueChange={handleRoleSelect}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Choose a role..." />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(ROLES).map(([roleId, role]) => (
-                <SelectItem key={roleId} value={roleId}>
-                  <div className="py-1">
-                    <div className="font-medium">{role.character}</div>
-                    <div className="text-sm text-gray-500">
-                      Played by: {role.actor}
-                    </div>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Scene Selection */}
-        {selectedRole && (
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Select Scene
-            </label>
-            <Select
-              value={selectedScene}
-              onValueChange={(value) => {
-                setSelectedScene(value);
-                resetScript();
-              }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Choose a scene..." />
-              </SelectTrigger>
-              <SelectContent>
-                {getCharacterScenes(selectedRole).map((scene) => (
-                  <SelectItem key={scene.id} value={scene.id}>
-                    <div className="py-1">
-                      <div className="font-medium">{scene.title}</div>
-                      <div className="text-sm text-gray-500">
-                        Location: {scene.location}
-                      </div>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+        <SceneSelection
+          selectedRole={selectedRole}
+          selectedScene={selectedScene}
+          onRoleSelect={handleRoleSelect}
+          onSceneSelect={handleSceneSelect}
+        />
 
         {/* Script Teleprompter */}
         {selectedRole && selectedScene && currentScript && (
