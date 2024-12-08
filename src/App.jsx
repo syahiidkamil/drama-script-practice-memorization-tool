@@ -10,13 +10,10 @@ const App = () => {
   const [selectedScene, setSelectedScene] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
-  const [scrollPosition, setScrollPosition] = useState(0);
   const [isUserTurn, setIsUserTurn] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [voicesLoaded, setVoicesLoaded] = useState(false);
 
-  const scriptContainerRef = useRef(null);
-  const animationRef = useRef(null);
   const utteranceRef = useRef(null);
   const currentScript = getScriptBySceneId(selectedScene);
   const dialogLines = getDialogLines(currentScript);
@@ -48,12 +45,8 @@ const App = () => {
     }
     setIsPlaying(false);
     setCurrentLineIndex(0);
-    setScrollPosition(0);
     setIsUserTurn(false);
     setHasStarted(false);
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-    }
   };
 
   const speakLine = (line) => {
@@ -150,45 +143,6 @@ const App = () => {
     setCurrentLineIndex((prev) => prev + 1);
   };
 
-  // Handle scroll animation
-  useEffect(() => {
-    if (!isPlaying || isUserTurn) return;
-
-    const animate = () => {
-      setScrollPosition((prev) => {
-        const container = scriptContainerRef.current;
-        if (!container) return prev;
-
-        const maxScroll = container.scrollHeight - container.clientHeight;
-        if (prev >= maxScroll) {
-          setIsPlaying(false);
-          return prev;
-        }
-        return prev + 1;
-      });
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    animationRef.current = requestAnimationFrame(animate);
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, [isPlaying, isUserTurn]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (utteranceRef.current) {
-        window.speechSynthesis.cancel();
-      }
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, []);
-
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-xl mx-auto space-y-6">
@@ -203,7 +157,6 @@ const App = () => {
           onSceneSelect={handleSceneSelect}
         />
 
-        {/* Script Display */}
         {selectedRole && selectedScene && currentScript && (
           <div className="mt-8 space-y-4">
             {/* Controls */}
@@ -233,27 +186,23 @@ const App = () => {
               </Button>
 
               {hasStarted && (
-                <>
-                  <Button
-                    onClick={resetScript}
-                    variant="outline"
-                    className="flex items-center space-x-2"
-                  >
-                    <RefreshCcw size={20} />
-                    <span>Reset</span>
-                  </Button>
-                </>
+                <Button
+                  onClick={resetScript}
+                  variant="outline"
+                  className="flex items-center space-x-2"
+                >
+                  <RefreshCcw size={20} />
+                  <span>Reset</span>
+                </Button>
               )}
             </div>
 
-            {/* Script Display */}
             <ScriptDisplay
               dialogLines={dialogLines}
               currentLineIndex={currentLineIndex}
               selectedRole={selectedRole}
             />
 
-            {/* User Turn UI */}
             {isUserTurn && (
               <div className="flex justify-center mt-4">
                 <Button
