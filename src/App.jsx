@@ -6,7 +6,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Play, Pause, RefreshCcw, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Play, Pause, RefreshCcw, Check, Volume2, VolumeX } from "lucide-react";
 import { ROLES } from "./constants";
 import {
   getCharacterScenes,
@@ -14,6 +15,7 @@ import {
   getDialogLines,
   getCharacterDisplayName,
 } from "./utils";
+import { speak, stopSpeaking, loadVoices } from "./utils";
 
 const App = () => {
   const [selectedRole, setSelectedRole] = useState("");
@@ -23,9 +25,20 @@ const App = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const [isUserTurn, setIsUserTurn] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
+  const [voicesLoaded, setVoicesLoaded] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
 
   const scriptContainerRef = useRef(null);
   const animationRef = useRef(null);
+  const speakTimeoutRef = useRef(null);
+
+  // Load voices when component mounts
+  useEffect(() => {
+    loadVoices().then(() => {
+      setVoicesLoaded(true);
+    });
+  }, []);
 
   const handleRoleSelect = (roleId) => {
     setSelectedRole(roleId);
@@ -34,21 +47,68 @@ const App = () => {
   };
 
   const resetScript = () => {
+    stopSpeaking();
     setIsPlaying(false);
     setCurrentLineIndex(0);
     setScrollPosition(0);
     setIsUserTurn(false);
     setHasStarted(false);
+    setIsSpeaking(false);
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
     }
+    if (speakTimeoutRef.current) {
+      clearTimeout(speakTimeoutRef.current);
+    }
+  };
+
+  const speakCurrentLine = () => {
+    if (!voicesLoaded || isMuted) return;
+
+    const currentScript = getScriptBySceneId(selectedScene);
+    const dialogLines = getDialogLines(currentScript);
+    const currentLine = dialogLines[currentLineIndex];
+
+    if (!currentLine) return;
+
+    // Don't speak if it's the user's turn
+    if (currentLine.character === selectedRole) return;
+
+    // Don't speak stage directions
+    if (currentLine.type === "stage_direction") return;
+
+    setIsSpeaking(true);
+    speak(
+      currentLine.text,
+      currentLine.character,
+      () => setIsSpeaking(true),
+      () => {
+        setIsSpeaking(false);
+        if (isPlaying) {
+          // Move to next line after a brief pause
+          speakTimeoutRef.current = setTimeout(() => {
+            setCurrentLineIndex((prev) => prev + 1);
+          }, 1000);
+        }
+      }
+    );
   };
 
   const togglePlayPause = () => {
     if (!hasStarted) {
       setHasStarted(true);
     }
+    if (isPlaying) {
+      stopSpeaking();
+    }
     setIsPlaying(!isPlaying);
+  };
+
+  const toggleMute = () => {
+    if (!isMuted) {
+      stopSpeaking();
+    }
+    setIsMuted(!isMuted);
   };
 
   const handleFinishTurn = () => {
@@ -94,9 +154,24 @@ const App = () => {
       if (currentDialog?.character === selectedRole) {
         setIsPlaying(false);
         setIsUserTurn(true);
+      } else if (isPlaying && !isSpeaking) {
+        speakCurrentLine();
       }
     }
-  }, [currentLineIndex, selectedRole, dialogLines]);
+  }, [currentLineIndex, selectedRole, dialogLines, isPlaying, isSpeaking]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopSpeaking();
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+      if (speakTimeoutRef.current) {
+        clearTimeout(speakTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const renderDialogLine = (line, index) => {
     const isCurrentLine = index === currentLineIndex;
@@ -109,7 +184,7 @@ const App = () => {
           isCurrentLine ? "bg-blue-50 border border-blue-200" : ""
         } ${isUserLine ? "text-blue-700" : "text-gray-700"}`}
       >
-        {line.type === "narration" ? (
+        {line.type === "narration" || line.type === "stage_direction" ? (
           <div className="italic text-gray-600">{line.text}</div>
         ) : (
           <>
@@ -218,22 +293,28 @@ const App = () => {
                   ) : (
                     <>
                       <Play size={24} />
-                      <span>
-                        {!hasStarted
-                          ? "Click here to Start Practice!"
-                          : "Resume"}
-                      </span>
+                      <span>{!hasStarted ? "Start Practice!" : "Resume"}</span>
                     </>
                   )}
                 </button>
                 {hasStarted && (
-                  <button
-                    onClick={resetScript}
-                    className="flex items-center space-x-2 px-6 py-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  >
-                    <RefreshCcw size={24} />
-                    <span>Reset</span>
-                  </button>
+                  <>
+                    <Button
+                      onClick={resetScript}
+                      variant="outline"
+                      className="flex items-center space-x-2"
+                    >
+                      <RefreshCcw size={20} />
+                      <span>Reset</span>
+                    </Button>
+                    <Button
+                      onClick={toggleMute}
+                      variant="outline"
+                      className="flex items-center space-x-2"
+                    >
+                      {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
@@ -252,13 +333,13 @@ const App = () => {
             {/* User Turn UI */}
             {isUserTurn && (
               <div className="flex justify-center">
-                <button
+                <Button
                   onClick={handleFinishTurn}
-                  className="flex items-center space-x-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  className="flex items-center space-x-2"
                 >
                   <Check size={20} />
                   <span>Finish Your Turn</span>
-                </button>
+                </Button>
               </div>
             )}
           </div>
