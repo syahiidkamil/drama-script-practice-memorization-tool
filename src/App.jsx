@@ -1,13 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, RefreshCcw, Check, Volume2, VolumeX } from "lucide-react";
-import {
-  getScriptBySceneId,
-  getDialogLines,
-  speak,
-  stopSpeaking,
-  loadVoices,
-} from "./utils";
+import { getScriptBySceneId, getDialogLines, loadVoices } from "./utils";
 import ScriptDisplay from "./components/ScriptDisplay";
 import SceneSelection from "./components/SceneSelection";
 
@@ -25,13 +19,18 @@ const App = () => {
 
   const scriptContainerRef = useRef(null);
   const animationRef = useRef(null);
-  const speakTimeoutRef = useRef(null);
+  const utteranceRef = useRef(null);
+  const currentScript = getScriptBySceneId(selectedScene);
+  const dialogLines = getDialogLines(currentScript);
 
   // Load voices when component mounts
   useEffect(() => {
-    loadVoices().then(() => {
-      setVoicesLoaded(true);
-    });
+    loadVoices().then(() => setVoicesLoaded(true));
+    return () => {
+      if (utteranceRef.current) {
+        window.speechSynthesis.cancel();
+      }
+    };
   }, []);
 
   const handleRoleSelect = (roleId) => {
@@ -46,7 +45,9 @@ const App = () => {
   };
 
   const resetScript = () => {
-    stopSpeaking();
+    if (utteranceRef.current) {
+      window.speechSynthesis.cancel();
+    }
     setIsPlaying(false);
     setCurrentLineIndex(0);
     setScrollPosition(0);
@@ -56,64 +57,120 @@ const App = () => {
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
     }
-    if (speakTimeoutRef.current) {
-      clearTimeout(speakTimeoutRef.current);
+  };
+
+  const speakLine = (line) => {
+    return new Promise((resolve, reject) => {
+      if (!voicesLoaded || isMuted || !line) {
+        resolve();
+        return;
+      }
+
+      // Don't speak if it's a stage direction or the user's line
+      if (line.type === "stage_direction" || line.character === selectedRole) {
+        resolve();
+        return;
+      }
+
+      const utterance = new SpeechSynthesisUtterance(line.text);
+      utteranceRef.current = utterance;
+
+      utterance.onend = () => {
+        utteranceRef.current = null;
+        setIsSpeaking(false);
+        resolve();
+      };
+
+      utterance.onerror = (error) => {
+        console.error("Speech error:", error);
+        utteranceRef.current = null;
+        setIsSpeaking(false);
+        reject(error);
+      };
+
+      setIsSpeaking(true);
+      window.speechSynthesis.speak(utterance);
+    });
+  };
+
+  // Handle auto-progression of lines
+  useEffect(() => {
+    let timeoutId;
+
+    const progressLine = async () => {
+      if (!isPlaying || isUserTurn || currentLineIndex >= dialogLines.length) {
+        return;
+      }
+
+      const currentLine = dialogLines[currentLineIndex];
+
+      try {
+        await speakLine(currentLine);
+
+        // Only progress if still playing and not user's turn
+        if (isPlaying && !isUserTurn) {
+          timeoutId = setTimeout(() => {
+            setCurrentLineIndex((prev) => prev + 1);
+          }, 1000); // Delay between lines
+        }
+      } catch (error) {
+        console.error("Error speaking line:", error);
+      }
+    };
+
+    progressLine();
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [
+    currentLineIndex,
+    isPlaying,
+    isUserTurn,
+    dialogLines,
+    isMuted,
+    voicesLoaded,
+  ]);
+
+  // Handle user turns
+  useEffect(() => {
+    if (selectedRole && dialogLines.length > currentLineIndex) {
+      const currentDialog = dialogLines[currentLineIndex];
+      if (currentDialog?.character === selectedRole) {
+        setIsPlaying(false);
+        setIsUserTurn(true);
+      }
     }
-  };
-
-  const handleSpeakComplete = () => {
-    setIsSpeaking(false);
-    if (isPlaying) {
-      speakTimeoutRef.current = setTimeout(() => {
-        setCurrentLineIndex((prev) => prev + 1);
-      }, 1000);
-    }
-  };
-
-  const speakCurrentLine = () => {
-    if (!voicesLoaded || isMuted) return;
-
-    const currentScript = getScriptBySceneId(selectedScene);
-    const dialogLines = getDialogLines(currentScript);
-    const currentLine = dialogLines[currentLineIndex];
-
-    if (!currentLine) return;
-
-    // Don't speak if it's the user's turn
-    if (currentLine.character === selectedRole) return;
-
-    // Don't speak stage directions
-    if (currentLine.type === "stage_direction") return;
-
-    setIsSpeaking(true);
-    speak(currentLine, handleSpeakComplete);
-  };
+  }, [currentLineIndex, selectedRole, dialogLines]);
 
   const togglePlayPause = () => {
     if (!hasStarted) {
       setHasStarted(true);
     }
     if (isPlaying) {
-      stopSpeaking();
+      if (utteranceRef.current) {
+        window.speechSynthesis.cancel();
+      }
     }
     setIsPlaying(!isPlaying);
   };
 
   const toggleMute = () => {
-    if (!isMuted) {
-      stopSpeaking();
+    if (!isMuted && utteranceRef.current) {
+      window.speechSynthesis.cancel();
     }
     setIsMuted(!isMuted);
   };
 
   const handleFinishTurn = () => {
     setIsUserTurn(false);
+    setIsPlaying(true);
     setCurrentLineIndex((prev) => prev + 1);
   };
 
-  const currentScript = getScriptBySceneId(selectedScene);
-  const dialogLines = getDialogLines(currentScript);
-
+  // Handle scroll animation
   useEffect(() => {
     if (!isPlaying || isUserTurn) return;
 
@@ -140,28 +197,14 @@ const App = () => {
     };
   }, [isPlaying, isUserTurn]);
 
-  // Monitor current line and detect user turns
-  useEffect(() => {
-    if (selectedRole && dialogLines.length > currentLineIndex) {
-      const currentDialog = dialogLines[currentLineIndex];
-      if (currentDialog?.character === selectedRole) {
-        setIsPlaying(false);
-        setIsUserTurn(true);
-      } else if (isPlaying && !isSpeaking) {
-        speakCurrentLine();
-      }
-    }
-  }, [currentLineIndex, selectedRole, dialogLines, isPlaying, isSpeaking]);
-
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      stopSpeaking();
+      if (utteranceRef.current) {
+        window.speechSynthesis.cancel();
+      }
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
-      }
-      if (speakTimeoutRef.current) {
-        clearTimeout(speakTimeoutRef.current);
       }
     };
   }, []);
