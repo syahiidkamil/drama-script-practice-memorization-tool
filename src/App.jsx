@@ -16,6 +16,7 @@ import {
   getCharacterDisplayName,
 } from "./utils";
 import { speak, stopSpeaking, loadVoices } from "./utils";
+import ScriptDisplay from "./components/ScriptDisplay";
 
 const App = () => {
   const [selectedRole, setSelectedRole] = useState("");
@@ -320,15 +321,12 @@ const App = () => {
             </div>
 
             {/* Script Display */}
-            <div className="relative h-64 border rounded-lg bg-white">
-              <div
-                ref={scriptContainerRef}
-                className="absolute inset-0 p-4 overflow-y-auto"
-                style={{ transform: `translateY(-${scrollPosition}px)` }}
-              >
-                {dialogLines.map(renderDialogLine)}
-              </div>
-            </div>
+            <ScriptDisplay
+              dialogLines={dialogLines}
+              currentLineIndex={currentLineIndex}
+              selectedRole={selectedRole}
+              scrollPosition={scrollPosition}
+            />
 
             {/* User Turn UI */}
             {isUserTurn && (
