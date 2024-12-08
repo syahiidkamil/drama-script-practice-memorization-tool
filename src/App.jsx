@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, RefreshCcw, Check, Volume2, VolumeX } from "lucide-react";
 import {
@@ -61,6 +61,15 @@ const App = () => {
     }
   };
 
+  const handleSpeakComplete = () => {
+    setIsSpeaking(false);
+    if (isPlaying) {
+      speakTimeoutRef.current = setTimeout(() => {
+        setCurrentLineIndex((prev) => prev + 1);
+      }, 1000);
+    }
+  };
+
   const speakCurrentLine = () => {
     if (!voicesLoaded || isMuted) return;
 
@@ -77,20 +86,7 @@ const App = () => {
     if (currentLine.type === "stage_direction") return;
 
     setIsSpeaking(true);
-    speak(
-      currentLine.text,
-      currentLine.character,
-      () => setIsSpeaking(true),
-      () => {
-        setIsSpeaking(false);
-        if (isPlaying) {
-          // Move to next line after a brief pause
-          speakTimeoutRef.current = setTimeout(() => {
-            setCurrentLineIndex((prev) => prev + 1);
-          }, 1000);
-        }
-      }
-    );
+    speak(currentLine, handleSpeakComplete);
   };
 
   const togglePlayPause = () => {
