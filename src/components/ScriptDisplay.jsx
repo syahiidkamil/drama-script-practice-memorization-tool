@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Lightbulb, Volume2 } from "lucide-react";
 
@@ -34,8 +34,13 @@ const ScriptDisplay = ({ dialogLines, currentLineIndex, selectedRole }) => {
   };
 
   const handleShowLine = () => {
-    setShowCurrentLine(true);
+    setShowCurrentLine(!showCurrentLine);
     setShowHint(false); // Reset hint state when showing full line
+  };
+
+  const handleShowHint = () => {
+    setShowHint(!showHint);
+    setShowCurrentLine(false);
   };
 
   const renderDialogLine = (line, index) => {
@@ -89,24 +94,25 @@ const ScriptDisplay = ({ dialogLines, currentLineIndex, selectedRole }) => {
             </div>
             {isCurrentLine && isUserLine && (
               <div className="mt-4 space-x-2">
-                {challengeMode && !showCurrentLine && (
-                  <Button
-                    onClick={() => setShowHint(true)}
-                    className="bg-yellow-500 hover:bg-yellow-600"
-                    disabled={showHint}
-                  >
-                    <Lightbulb className="w-4 h-4 mr-2" />
-                    Show Hint
-                  </Button>
+                {challengeMode && (
+                  <>
+                    <Button
+                      onClick={handleShowHint}
+                      className="bg-yellow-500 hover:bg-yellow-600"
+                    >
+                      <Lightbulb className="w-4 h-4 mr-2" />
+                      {showHint ? "Revert to ..." : "Show Hint"}
+                    </Button>
+                    <Button
+                      onClick={handleShowLine}
+                      className="bg-green-500 hover:bg-green-600"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      {showCurrentLine ? "Revert to ...." : "Show Line"}
+                    </Button>
+                  </>
                 )}
-                <Button
-                  onClick={handleShowLine}
-                  className="bg-green-500 hover:bg-green-600"
-                  disabled={showCurrentLine}
-                >
-                  <Eye className="w-4 h-4 mr-2" />
-                  Show Line
-                </Button>
+
                 <Button
                   onClick={() => speakLine(line.text)}
                   className="bg-purple-500 hover:bg-purple-600"
@@ -127,7 +133,7 @@ const ScriptDisplay = ({ dialogLines, currentLineIndex, selectedRole }) => {
       <div className="flex justify-end mb-4">
         <Button
           onClick={toggleChallengeMode}
-          variant={challengeMode ? "destructive" : "outline"}
+          variant={challengeMode ? "destructive" : "outline-blue"}
           className="flex items-center"
         >
           {challengeMode ? (
