@@ -223,55 +223,54 @@ const App = () => {
           onSceneSelect={handleSceneSelect}
         />
 
-        {/* Script Teleprompter */}
+        {/* Script Display */}
         {selectedRole && selectedScene && currentScript && (
           <div className="mt-8 space-y-4">
             {/* Controls */}
-            <div className="flex flex-col items-center space-y-4">
-              <div className="flex justify-center space-x-4">
-                <button
-                  onClick={togglePlayPause}
-                  className={`flex items-center space-x-2 px-6 py-3 rounded-lg ${
-                    !hasStarted
-                      ? "bg-green-600 text-white hover:bg-green-700"
-                      : isPlaying
-                      ? "bg-red-100 text-red-600"
-                      : "bg-green-100 text-green-600"
-                  }`}
-                  disabled={isUserTurn}
-                >
-                  {isPlaying ? (
-                    <>
-                      <Pause size={24} />
-                      <span>Pause</span>
-                    </>
-                  ) : (
-                    <>
-                      <Play size={24} />
-                      <span>{!hasStarted ? "Start Practice!" : "Resume"}</span>
-                    </>
-                  )}
-                </button>
-                {hasStarted && (
+            <div className="flex justify-center space-x-4">
+              <Button
+                onClick={togglePlayPause}
+                className={`flex items-center space-x-2 ${
+                  !hasStarted
+                    ? "bg-green-600 hover:bg-green-700"
+                    : isPlaying
+                    ? "bg-red-100 text-red-600"
+                    : "bg-green-100 text-green-600"
+                }`}
+                disabled={isUserTurn}
+              >
+                {isPlaying ? (
                   <>
-                    <Button
-                      onClick={resetScript}
-                      variant="outline"
-                      className="flex items-center space-x-2"
-                    >
-                      <RefreshCcw size={20} />
-                      <span>Reset</span>
-                    </Button>
-                    <Button
-                      onClick={toggleMute}
-                      variant="outline"
-                      className="flex items-center space-x-2"
-                    >
-                      {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-                    </Button>
+                    <Pause size={20} />
+                    <span>Pause</span>
+                  </>
+                ) : (
+                  <>
+                    <Play size={20} />
+                    <span>{!hasStarted ? "Start Practice!" : "Resume"}</span>
                   </>
                 )}
-              </div>
+              </Button>
+
+              {hasStarted && (
+                <>
+                  <Button
+                    onClick={resetScript}
+                    variant="outline"
+                    className="flex items-center space-x-2"
+                  >
+                    <RefreshCcw size={20} />
+                    <span>Reset</span>
+                  </Button>
+                  <Button
+                    onClick={toggleMute}
+                    variant="outline"
+                    className="flex items-center space-x-2"
+                  >
+                    {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                  </Button>
+                </>
+              )}
             </div>
 
             {/* Script Display */}
@@ -279,12 +278,11 @@ const App = () => {
               dialogLines={dialogLines}
               currentLineIndex={currentLineIndex}
               selectedRole={selectedRole}
-              scrollPosition={scrollPosition}
             />
 
             {/* User Turn UI */}
             {isUserTurn && (
-              <div className="flex justify-center">
+              <div className="flex justify-center mt-4">
                 <Button
                   onClick={handleFinishTurn}
                   className="flex items-center space-x-2"
