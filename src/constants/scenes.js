@@ -15,7 +15,7 @@ export const SCENES = {
     description: `Setelah beberapa hari bekerja, Ben akhirnya bertemu dengan Jules, CEO perusahaan
         yang awalnya tidak yakin tentang pemagang senior. Ini adalah momen penting karena menandai awal
         hubungan profesional yang berangsur-angsur berubah menjadi persahabatan.`,
-    characters: ["BEN_WHITTAKER", "JULES_OSTIN", "BECKY", "JASON"],
+    characters: ["BEN_WHITTAKER", "JULES_OSTIN", "BECKY", "JASON", "NARRATOR"],
     location: "Office - Jules's Room",
     props: [
       "Meja kantor",
@@ -28,7 +28,7 @@ export const SCENES = {
     id: "SCENE_3",
     title: "SCENE 3: Jules tidak sengaja salah mengirim email",
     description: `Jules tidak sengaja mengirim email berisi keluhan tentang ibunya kepada ibunya sendiri.`,
-    characters: ["BEN_WHITTAKER", "JULES_OSTIN", "BECKY", "JASON"],
+    characters: ["BEN_WHITTAKER", "JULES_OSTIN", "BECKY", "JASON", "NARRATOR"],
     location: "Office - Common Area",
     props: [
       "Meja kantor",
@@ -42,7 +42,7 @@ export const SCENES = {
     title: '4. Misi "Pencurian" Email',
     description: `Adegan lucu dan penuh adrenalin ketika Ben dan beberapa rekan kerja berusaha menghapus
         email yang dikirim Jules secara tidak sengaja.`,
-    characters: ["BEN_WHITTAKER", "WILLIAM_SQUAT", "JOHN_DUE"],
+    characters: ["BEN_WHITTAKER", "WILLIAM_SQUAT", "JOHN_DUE", "NARRATOR"],
     location: "Jules's Mother's House",
     props: [
       "Sarung untuk William dan John",
@@ -55,7 +55,13 @@ export const SCENES = {
     id: "SCENE_5",
     title: "SCENE 5: Ben membantu menenangkan anak Jules",
     description: `Ben membantu menenangkan Carla yang merasa ditinggalkan oleh ibunya yang sibuk bekerja.`,
-    characters: ["BEN_WHITTAKER", "JULES_OSTIN", "CARLA_OSTIN", "MATT_OSTIN"],
+    characters: [
+      "BEN_WHITTAKER",
+      "JULES_OSTIN",
+      "CARLA_OSTIN",
+      "MATT_OSTIN",
+      "NARRATOR",
+    ],
     location: "Jules's House - Living Room",
     props: [
       "Sofa atau kursi",
@@ -67,7 +73,7 @@ export const SCENES = {
     id: "SCENE_6",
     title: "SCENE 6: Ben is making a change at work",
     description: `Ben's hard work starts to make a difference at the office, impressing those around him.`,
-    characters: ["BEN_WHITTAKER", "ANNA_SCOTT"],
+    characters: ["BEN_WHITTAKER", "ANNA_SCOTT", "NARRATOR"],
     location: "Office - Ben's Desk Area",
     props: ["Dompet Anna", "Meja kerja", "Laptop untuk Ben"],
   },
@@ -75,7 +81,7 @@ export const SCENES = {
     id: "SCENE_7",
     title: "SCENE 7: Ostin ketahuan selingkuh sama anna",
     description: `Ben menemukan Matt Ostin sedang bersama Anna di rumah Anna.`,
-    characters: ["BEN_WHITTAKER", "ANNA_SCOTT", "MATT_OSTIN"],
+    characters: ["BEN_WHITTAKER", "ANNA_SCOTT", "MATT_OSTIN", "NARRATOR"],
     location: "Anna's House",
     props: [],
   },
@@ -83,7 +89,7 @@ export const SCENES = {
     id: "SCENE_8",
     title: "SCENE 8: Jules ngobrol sama Cameron tentang ide CEO baru",
     description: `Jules ragu untuk menyerahkan posisi CEO kepada orang lain meskipun investor menginginkannya.`,
-    characters: ["BEN_WHITTAKER", "JULES_OSTIN", "CAMERON"],
+    characters: ["BEN_WHITTAKER", "JULES_OSTIN", "CAMERON", "NARRATOR"],
     location: "Office - Cameron's Room",
     props: [],
   },
@@ -91,7 +97,7 @@ export const SCENES = {
     id: "SCENE_9",
     title: "SCENE 9: Jules curhat sama Ben tentang retirement",
     description: `Jules mempertimbangkan untuk mundur sebagai CEO, tetapi Ben membantunya menemukan kepercayaan diri.`,
-    characters: ["BEN_WHITTAKER", "JULES_OSTIN", "CAMERON"],
+    characters: ["BEN_WHITTAKER", "JULES_OSTIN", "CAMERON", "NARRATOR"],
     location: "Park Near Office",
     props: [],
   },
