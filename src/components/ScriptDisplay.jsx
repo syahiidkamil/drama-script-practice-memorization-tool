@@ -30,19 +30,36 @@ const ScriptDisplay = ({ dialogLines, currentLineIndex, selectedRole }) => {
   };
 
   const speakLine = (text, characterId) => {
+    console.log("characterId", characterId);
+
     const utterance = new SpeechSynthesisUtterance(text);
     const characterRole = ROLES[characterId];
+    const allVoices = window.speechSynthesis.getVoices();
 
     if (characterRole?.speech) {
-      const allVoices = window.speechSynthesis.getVoices();
-      const voice = allVoices.find(
-        (v) => v.name === characterRole.speech.voice
-      );
-      if (voice) utterance.voice = voice;
+      const matchingVoice = allVoices.find((voice) => {
+        return voice.name === characterRole.speech.voice;
+      });
 
-      utterance.pitch = characterRole.speech.pitch;
-      utterance.rate = characterRole.speech.rate;
-      utterance.volume = characterRole.speech.volume;
+      if (matchingVoice) {
+        console.log("Found voice:", matchingVoice.name); // Debug log
+        utterance.voice = matchingVoice;
+        utterance.pitch = characterRole.speech.pitch;
+        utterance.rate = characterRole.speech.rate;
+        utterance.volume = characterRole.speech.volume;
+      } else {
+        console.log(
+          "No matching voice found for",
+          characterId,
+          "using default"
+        );
+        const defaultVoice = allVoices.find(
+          (voice) =>
+            voice.name === "Google US English" ||
+            voice.name === "Daniel (English (United Kingdom))"
+        );
+        if (defaultVoice) utterance.voice = defaultVoice;
+      }
     }
 
     window.speechSynthesis.speak(utterance);
@@ -129,7 +146,7 @@ const ScriptDisplay = ({ dialogLines, currentLineIndex, selectedRole }) => {
                 )}
 
                 <Button
-                  onClick={() => speakLine(line.text)}
+                  onClick={() => speakLine(line.text, line.character)}
                   className="bg-purple-500 hover:bg-purple-600"
                 >
                   <Volume2 className="w-4 h-4 mr-2" />
