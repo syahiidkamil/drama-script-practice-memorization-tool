@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Lightbulb, Volume2 } from "lucide-react";
 import { ROLES } from "@/constants";
@@ -8,6 +8,33 @@ const ScriptDisplay = ({ dialogLines, currentLineIndex, selectedRole }) => {
   const [challengeMode, setChallengeMode] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [showCurrentLine, setShowCurrentLine] = useState(false);
+
+  const containerRef = useRef(null);
+  const lineRefs = useRef([]);
+
+  // Set up line refs array when dialogLines changes
+  useEffect(() => {
+    lineRefs.current = lineRefs.current.slice(0, dialogLines.length);
+  }, [dialogLines]);
+
+  // Scroll to current line
+  useEffect(() => {
+    if (!containerRef.current || !lineRefs.current[currentLineIndex]) {
+      return;
+    }
+
+    lineRefs.current[currentLineIndex].scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, [currentLineIndex]);
+
+  // Reset scroll position when dialogLines change (scene change or reset)
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0;
+    }
+  }, [dialogLines]);
 
   const toggleChallengeMode = () => {
     setChallengeMode(!challengeMode);
@@ -23,7 +50,6 @@ const ScriptDisplay = ({ dialogLines, currentLineIndex, selectedRole }) => {
 
   const getHintText = (text) => {
     const words = text.split(" ");
-    // Show first word, then every 4th word, rest as dots
     return words
       .map((word, index) => (index === 0 || index % 4 === 0 ? word : "...."))
       .join(" ");
@@ -42,7 +68,7 @@ const ScriptDisplay = ({ dialogLines, currentLineIndex, selectedRole }) => {
       });
 
       if (matchingVoice) {
-        console.log("Found voice:", matchingVoice.name); // Debug log
+        console.log("Found voice:", matchingVoice.name);
         utterance.voice = matchingVoice;
         utterance.pitch = characterRole.speech.pitch;
         utterance.rate = characterRole.speech.rate;
@@ -67,7 +93,7 @@ const ScriptDisplay = ({ dialogLines, currentLineIndex, selectedRole }) => {
 
   const handleShowLine = () => {
     setShowCurrentLine(!showCurrentLine);
-    setShowHint(false); // Reset hint state when showing full line
+    setShowHint(false);
   };
 
   const handleShowHint = () => {
@@ -83,7 +109,6 @@ const ScriptDisplay = ({ dialogLines, currentLineIndex, selectedRole }) => {
     let displayText = line.text;
     if (shouldHide) {
       if (isCurrentLine) {
-        // Only show hints or full text for current line
         if (showCurrentLine) {
           displayText = line.text;
         } else if (showHint) {
@@ -93,7 +118,6 @@ const ScriptDisplay = ({ dialogLines, currentLineIndex, selectedRole }) => {
             "........................................................";
         }
       } else {
-        // All other user lines are hidden in challenge mode
         displayText =
           "........................................................";
       }
@@ -102,7 +126,8 @@ const ScriptDisplay = ({ dialogLines, currentLineIndex, selectedRole }) => {
     return (
       <div
         key={index}
-        className={`mb-4 p-4 rounded-md ${
+        ref={(el) => (lineRefs.current[index] = el)}
+        className={`mb-4 p-4 rounded-md transition-all duration-300 ${
           isCurrentLine ? "bg-blue-100 border-2 border-blue-300" : ""
         } ${isUserLine ? "text-blue-700" : "text-gray-700"}`}
       >
@@ -181,7 +206,10 @@ const ScriptDisplay = ({ dialogLines, currentLineIndex, selectedRole }) => {
           )}
         </Button>
       </div>
-      <div className="border rounded-lg bg-white shadow-sm h-96 overflow-y-auto p-6">
+      <div
+        ref={containerRef}
+        className="border rounded-lg bg-white shadow-sm h-96 overflow-y-auto p-6 scroll-smooth"
+      >
         {dialogLines.map(renderDialogLine)}
       </div>
     </div>
