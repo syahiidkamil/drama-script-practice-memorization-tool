@@ -1,3 +1,4 @@
+import { ROLES } from "../roles";
 import { SCENES } from "../scenes";
 
 export const SCENE_2_SCRIPT = {
@@ -11,7 +12,7 @@ export const SCENE_2_SCRIPT = {
 
   dialog: [
     {
-      character: "NARRATOR",
+      character: ROLES.NARRATOR.id,
       type: "narration",
       text: "After arriving in his house, Ben submitted his job application … And then after several days … Finally, he got the good news about it … He passed the test! And today will be his first day as the senior intern …",
       emotion: "upbeat",
@@ -80,7 +81,7 @@ export const SCENE_2_SCRIPT = {
       emotion: null,
     },
     {
-      character: "BECKY",
+      character: ROLES.BECKY.id,
       type: "dialog",
       text: "So, how's it going, Ben? Getting used to the tech world?",
       emotion: "friendly",

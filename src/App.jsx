@@ -4,6 +4,7 @@ import { Play, Pause, RefreshCcw, Check } from "lucide-react";
 import { getScriptBySceneId, getDialogLines, loadVoices } from "./utils";
 import ScriptDisplay from "./components/ScriptDisplay";
 import SceneSelection from "./components/SceneSelection";
+import { ROLES } from "./constants";
 
 const App = () => {
   const [selectedRole, setSelectedRole] = useState("");
@@ -63,6 +64,33 @@ const App = () => {
       }
 
       const utterance = new SpeechSynthesisUtterance(line.text);
+      const characterRole = ROLES[line.character];
+      const allVoices = window.speechSynthesis.getVoices();
+
+      if (characterRole?.speech) {
+        // Try to match the voice by name
+        const matchingVoice = allVoices.find(
+          (voice) => voice.name === characterRole.speech.voice
+        );
+
+        console.log("Found matching voice:", matchingVoice?.name);
+
+        if (matchingVoice) {
+          utterance.voice = matchingVoice;
+          utterance.pitch = characterRole.speech.pitch;
+          utterance.rate = characterRole.speech.rate;
+          utterance.volume = characterRole.speech.volume;
+        } else {
+          console.log("No matching voice found for", line.character);
+          const defaultVoice = allVoices.find(
+            (voice) =>
+              voice.name === "Google US English" ||
+              voice.name === "Daniel (English (United Kingdom))"
+          );
+          if (defaultVoice) utterance.voice = defaultVoice;
+        }
+      }
+
       utteranceRef.current = utterance;
 
       utterance.onend = () => {

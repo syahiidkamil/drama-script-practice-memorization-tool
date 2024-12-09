@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Lightbulb, Volume2 } from "lucide-react";
+import { ROLES } from "@/constants";
 
 const ScriptDisplay = ({ dialogLines, currentLineIndex, selectedRole }) => {
   const [challengeMode, setChallengeMode] = useState(false);
@@ -28,8 +29,22 @@ const ScriptDisplay = ({ dialogLines, currentLineIndex, selectedRole }) => {
       .join(" ");
   };
 
-  const speakLine = (text) => {
+  const speakLine = (text, characterId) => {
     const utterance = new SpeechSynthesisUtterance(text);
+    const characterRole = ROLES[characterId];
+
+    if (characterRole?.speech) {
+      const allVoices = window.speechSynthesis.getVoices();
+      const voice = allVoices.find(
+        (v) => v.name === characterRole.speech.voice
+      );
+      if (voice) utterance.voice = voice;
+
+      utterance.pitch = characterRole.speech.pitch;
+      utterance.rate = characterRole.speech.rate;
+      utterance.volume = characterRole.speech.volume;
+    }
+
     window.speechSynthesis.speak(utterance);
   };
 

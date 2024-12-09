@@ -6,9 +6,9 @@ export const ROLES = {
     description:
       "Seorang pensiunan berusia 70 tahun yang menjadi intern senior di sebuah perusahaan startup mode",
     speech: {
-      voice: "en-US-SteffanNeural", // Older male voice
+      voice: "Daniel (English (United Kingdom))", // Mature male voice
       pitch: 0.9,
-      rate: 0.85, // Slightly slower for elderly character
+      rate: 0.85,
       volume: 1.0,
     },
   },
@@ -19,9 +19,9 @@ export const ROLES = {
     description:
       "CEO muda dari perusahaan e-commerce fashion bernama About the Fit",
     speech: {
-      voice: "en-US-JennyNeural", // Professional female voice
+      voice: "Google UK English Female", // Professional female voice
       pitch: 1.0,
-      rate: 1.1, // Slightly faster for dynamic CEO
+      rate: 1.1,
       volume: 1.0,
     },
   },
@@ -32,7 +32,7 @@ export const ROLES = {
     description:
       "Manajer senior di perusahaan About the Fit yang berperan penting dalam operasional perusahaan",
     speech: {
-      voice: "en-US-ChristopherNeural", // Professional male voice
+      voice: "Google UK English Male", // Professional male voice
       pitch: 1.0,
       rate: 1.0,
       volume: 1.0,
@@ -45,9 +45,9 @@ export const ROLES = {
     description:
       "Asisten Jules yang sering terlihat stres mengurus jadwal bosnya",
     speech: {
-      voice: "en-US-AriaNeural", // Energetic female voice
+      voice: "Martha", // Energetic female voice
       pitch: 1.1,
-      rate: 1.15, // Slightly faster for stressed assistant
+      rate: 1.15,
       volume: 1.0,
     },
   },
@@ -57,8 +57,8 @@ export const ROLES = {
     character: "Carla Ostin",
     description: "Putri Jules dan Matt",
     speech: {
-      voice: "en-US-SaraNeural", // Young female voice
-      pitch: 1.2, // Higher pitch for child
+      voice: "Junior", // Young voice
+      pitch: 1.2,
       rate: 1.0,
       volume: 0.9,
     },
@@ -69,7 +69,7 @@ export const ROLES = {
     character: "Ben's Friend",
     description: "Teman Ben",
     speech: {
-      voice: "en-US-GuyNeural", // Friendly male voice
+      voice: "Ralph", // Friendly male voice
       pitch: 0.95,
       rate: 0.9,
       volume: 1.0,
@@ -81,7 +81,7 @@ export const ROLES = {
     character: "William Squat",
     description: "Rekan kerja Ben",
     speech: {
-      voice: "en-US-TonyNeural",
+      voice: "Google US English",
       pitch: 1.0,
       rate: 1.0,
       volume: 1.0,
@@ -93,7 +93,7 @@ export const ROLES = {
     character: "John Due",
     description: "Rekan kerja Ben",
     speech: {
-      voice: "en-US-DavisNeural",
+      voice: "Fred",
       pitch: 1.0,
       rate: 1.0,
       volume: 1.0,
@@ -105,7 +105,7 @@ export const ROLES = {
     character: "Matt Ostin",
     description: "Suami Jules",
     speech: {
-      voice: "en-US-EricNeural",
+      voice: "Albert",
       pitch: 1.0,
       rate: 1.0,
       volume: 1.0,
@@ -117,9 +117,9 @@ export const ROLES = {
     character: "Jason",
     description: "Junior Project Manager",
     speech: {
-      voice: "en-US-AndrewNeural", // Young male voice
+      voice: "Reed (English (United States))", // Young male voice
       pitch: 1.05,
-      rate: 1.1, // Slightly faster for young professional
+      rate: 1.1,
       volume: 1.0,
     },
   },
@@ -129,9 +129,9 @@ export const ROLES = {
     character: "Narrator",
     description: "Narator cerita",
     speech: {
-      voice: "en-US-EmmaNeural", // Clear, neutral voice for narration
+      voice: "Karen", // Clear, neutral voice
       pitch: 1.0,
-      rate: 0.95, // Slightly slower for clear narration
+      rate: 0.95,
       volume: 1.0,
     },
   },
@@ -141,7 +141,7 @@ export const ROLES = {
     character: "Anna Scott",
     description: "Selingkuhan Matt Ostin",
     speech: {
-      voice: "en-US-MichelleNeural",
+      voice: "Alice",
       pitch: 1.0,
       rate: 1.0,
       volume: 1.0,
