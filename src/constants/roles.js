@@ -6,9 +6,9 @@ export const ROLES = {
     description:
       "Seorang pensiunan berusia 70 tahun yang menjadi intern senior di sebuah perusahaan startup mode",
     speech: {
-      voice: "Grandpa (English (United States))", // Mature male voice
-      pitch: 1.0,
-      rate: 1.0,
+      voice: "en-US-SteffanNeural", // Older male voice
+      pitch: 0.9,
+      rate: 0.85, // Slightly slower for elderly character
       volume: 1.0,
     },
   },
